@@ -1,6 +1,6 @@
-import tensorflow as tf
-from code.bilmModel import BiLstm_Model
-from code.BatchGenerator import BatchGenerator
+import tensorflow.compat.v1 as tf
+from bilmModel import BiLstm_Model
+from BatchGenerator import BatchGenerator
 import time
 
 '''
@@ -13,7 +13,7 @@ class Config():
     配置文件的类
     """
 
-    def __init__(self, input, timestep, batchsize, hidden_unit, learning_rate, epoch, projection_dim,n_negative_samples_batch,token_size,is_Training,is_Diveristy=False):
+    def __init__(self, input, timestep, batchsize, hidden_unit, learning_rate, epoch, projection_dim,n_negative_samples_batch,token_size,is_Training,is_Diveristy=False,topkSize=5):
         self.TimeStep = timestep
         self.input = input
         self.batchsize = batchsize
@@ -25,6 +25,7 @@ class Config():
         self.token_size = token_size
         self.n_negative_samples_batch = n_negative_samples_batch
         self.is_Diversity = is_Diveristy
+        self.topkSize=topkSize
 
 class BatchConfig():
     def __init__(self,batchsize,timestep,randompathcount):
@@ -164,6 +165,7 @@ def _deduplicate_indexed_slices(values, indices):
 
 
 def trainModel(BG,config):
+    tf.disable_eager_execution()
     X_fw = tf.placeholder(dtype=tf.float32, shape=[None, config.TimeStep, config.input])
     Y_fw = tf.placeholder(dtype=tf.float32, shape=[None, config.TimeStep])
     X_bw = tf.placeholder(dtype=tf.float32, shape=[None, config.TimeStep, config.input])
@@ -201,7 +203,7 @@ def trainModel(BG,config):
         init_state_tensor.extend(lstm_model.initial_state)
         final_state_tensor.extend(lstm_model.final_state)
         saver = tf.train.Saver()
-        checkpoint = tf.train.get_checkpoint_state("./ckpt")
+        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt")
         if checkpoint and checkpoint.model_checkpoint_path:
             saver.restore(sess, checkpoint.model_checkpoint_path)
             print("Successfully loaded:", checkpoint.model_checkpoint_path)
@@ -220,7 +222,7 @@ def trainModel(BG,config):
             print(str(ret[1]))
             initial_state_value = ret[4:]
             if batchcount % 1000 == 0:
-                saver.save(sess, "./ckpt/bilm", global_step=batchcount)
+                saver.save(sess, "../dataset/ckpt/bilm", global_step=batchcount)
                 print("  time : " + str(time.time() - start))
                 start = time.time()
 
@@ -260,11 +262,11 @@ def useModel(BG,config):
 if __name__ == "__main__":
 
     # 定义一个配置类的对象
-    batchconfig = BatchConfig(batchsize=512,timestep=7,randompathcount=1)
+    batchconfig = BatchConfig(batchsize=1,timestep=7,randompathcount=1)
     BG = BatchGenerator(batchconfig)
 
     config = Config(learning_rate=0.2, batchsize=batchconfig.batchsize, input=300, timestep=8, projection_dim=300,
-                    epoch=60, hidden_unit=4096,n_negative_samples_batch=8192,token_size=BG.token_size,is_Training = True)
+                    epoch=10, hidden_unit=4096,n_negative_samples_batch=8192,token_size=BG.token_size,is_Training = True)
 
     trainModel(BG,config)
     # ret = useModel(BG,config)

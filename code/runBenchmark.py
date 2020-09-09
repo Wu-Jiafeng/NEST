@@ -57,20 +57,21 @@ if __name__ == "__main__":
     ESBM_D_Top10 = doBenchMark4ESBM(os.path.join(dataSetRootPath,"ESBMDTop10"), 10)
     ESBM_L_Top5 = doBenchMark4ESBM(os.path.join(dataSetRootPath,"ESBMLTop5"), 5)
     ESBM_L_Top10 = doBenchMark4ESBM(os.path.join(dataSetRootPath,"ESBMLTop10"), 10)
-    FED_Top5 = doBenchMark4FED(os.path.join(dataSetRootPath,"FEDTop5"), 5)
-    FED_Top10 = doBenchMark4FED(os.path.join(dataSetRootPath,"FEDTop10"), 10)
+    #FED_Top5 = doBenchMark4FED(os.path.join(dataSetRootPath,"FEDTop5"), 5)
+    #FED_Top10 = doBenchMark4FED(os.path.join(dataSetRootPath,"FEDTop10"), 10)
     if datasetName == "ESBM":
         print("ESBM-D Top5 F1 : " + str(ESBM_D_Top5))
         print("ESBM-D Top10 F1 : " + str(ESBM_D_Top10))
         print("ESBM-L Top5 F1 : " + str(ESBM_L_Top5))
         print("ESBM-L Top10 F1 : " + str(ESBM_L_Top10))
     elif datasetName == "FED":
-        print("FED Top5 F1 : " + str(FED_Top5))
-        print("FED Top10 F1 : " + str(FED_Top10))
+        pass
+        #print("FED Top5 F1 : " + str(FED_Top5))
+        #print("FED Top10 F1 : " + str(FED_Top10))
     else:
         print("ESBM-D Top5 F1 : " + str(ESBM_D_Top5))
         print("ESBM-D Top10 F1 : " + str(ESBM_D_Top10))
         print("ESBM-L Top5 F1 : " + str(ESBM_L_Top5))
         print("ESBM-L Top10 F1 : " + str(ESBM_L_Top10))
-        print("FED Top5 F1 : " + str(FED_Top5))
-        print("FED Top10 F1 : " + str(FED_Top10))
+        #print("FED Top5 F1 : " + str(FED_Top5))
+        #print("FED Top10 F1 : " + str(FED_Top10))

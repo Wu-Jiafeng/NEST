@@ -1,10 +1,11 @@
-from code.bilmModel import Fine_Tuning_BiLstm_Model_Test
+from bilmModel import Fine_Tuning_BiLstm_Model_Test
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import os
-from code.BatchGenerator import FineTuningBatchGenerator
-from code.preTrain import Config
+from BatchGenerator import FineTuningBatchGenerator
+from preTrain import Config
 import time
+tf.disable_v2_behavior()
 
 
 
@@ -34,12 +35,12 @@ def fine_tuning_model_ranking(config,FTBG,saveID):
     saver = tf.train.Saver(var_list=all_training_variable)
     tfConfig = tf.ConfigProto(allow_soft_placement=True)
     tfConfig.gpu_options.allow_growth = True
-    save_path = "./ckpt/fed/" + str(saveID)
+    save_path = "../dataset/ckpt" + str(saveID)
     if not os.path.isdir(save_path):
         os.mkdir(save_path)
     with tf.Session(config=tfConfig) as sess:
         sess.run(init)
-        checkpoint = tf.train.get_checkpoint_state("./ckpt/bilm")
+        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt")
         saver.restore(sess, checkpoint.model_checkpoint_path)
         saver = tf.train.Saver(max_to_keep=1)
         start = time.time()
@@ -49,7 +50,7 @@ def fine_tuning_model_ranking(config,FTBG,saveID):
             ret = sess.run([train_op,lstm_model.total_loss,lstm_model.output],feed_dict=feed_dict)
             print(str(ret[1]))
 
-            if (batchcount+1) % 10000 == 0:
+            if (batchcount+1) % 1000 == 0:
                 saver.save(sess, save_path + "/bilm", global_step=batchcount)
                 # saver.save(sess, "../AllCkpt/imdb_sample_ckpt_top5/bilm", global_step=batchcount)
                 print("  time : " + str(time.time() - start))
@@ -90,7 +91,7 @@ def fine_tuning_model_diversity(config,FTBG,saveID):
     saver = tf.train.Saver(var_list=all_training_variable, max_to_keep=1)
     tfConfig = tf.ConfigProto(allow_soft_placement=True)
     tfConfig.gpu_options.allow_growth = True
-    save_path = "/ckpt/fed/" + str(saveID)
+    save_path = "../dataset/ckpt" + str(saveID)
     with tf.Session(config=tfConfig) as sess:
         sess.run(init)
         checkpoint = tf.train.get_checkpoint_state(save_path)
@@ -115,7 +116,7 @@ def fine_tuning_model_diversity(config,FTBG,saveID):
                 instance.clear()
                 label.clear()
 
-            if (batchcount+1) % 10000 == 0:
+            if (batchcount+1) % 1000 == 0:
 
                 saver.save(sess, save_path + "/bilm", global_step=batchcount)
                 print("  time : " + str(time.time() - start))
@@ -124,10 +125,10 @@ def fine_tuning_model_diversity(config,FTBG,saveID):
 if __name__ == "__main__":
     FTBG = FineTuningBatchGenerator()
     config = Config(learning_rate=0.2, batchsize=5, input=300, timestep=3, projection_dim=300,
-                    epoch=20, hidden_unit=4096,n_negative_samples_batch=8192,token_size=0,is_Training = True)
+                    epoch=10, hidden_unit=4096,n_negative_samples_batch=8192,token_size=0,is_Training = True)
     config.is_Diversity = False
-    fine_tuning_model_ranking(config,FTBG,0)
+    fine_tuning_model_ranking(config,FTBG,1)
     tf.reset_default_graph()
     config.is_Diversity = True
-    fine_tuning_model_diversity(config,FTBG,0)
+    fine_tuning_model_diversity(config,FTBG,1)
     tf.reset_default_graph()

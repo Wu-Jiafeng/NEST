@@ -2,7 +2,7 @@ import numpy as np
 import random
 import copy
 import os
-DEMOPATH = "../dataset/Demo4FED/"
+DEMOPATH = "../dataset/"
 class BatchConfig():
     def __init__(self,batchsize,timestep,randompathcount):
         self.batchsize = batchsize
@@ -34,7 +34,8 @@ class BatchGenerator():
         Y_fw = []
         X_bw = []
         Y_bw = []
-        for bno in range(batchsize):
+        bsize=min(batchsize,len(this_batch))
+        for bno in range(bsize):
             minibatch = []
             for ts in range(timestep):
                 if ts == 0:
@@ -43,12 +44,12 @@ class BatchGenerator():
                     minibatch.append((self.id_2_feature[this_batch[bno][ts-1]]))
             X_fw.append(minibatch)
 
-        for bno in range(batchsize):
+        for bno in range(bsize):
             te = this_batch[bno].copy()
             te.append('1')
             Y_fw.append(np.array(te).astype(np.int).tolist())
 
-        for bno in range(batchsize):
+        for bno in range(bsize):
             minibatch = []
             te = this_batch[bno].copy()
             te.append('1')
@@ -57,7 +58,7 @@ class BatchGenerator():
                 minibatch.append((self.id_2_feature[te[ts]]))
             X_bw.append(minibatch)
 
-        for bno in range(batchsize):
+        for bno in range(bsize):
             te = this_batch[bno].copy()
             te.reverse()
             te.append('0')
@@ -164,18 +165,21 @@ class BatchGenerator():
                 elif len(stack) == path_length:
                     te = []
                     for node in stack:
+                        if node =="": continue
                         name = self.node_id[node]
                         te.append(name)
+                    if len(te) %2 ==0:
+                        break
                     self.all_path.append(te)
                     sample_count = sample_count + 1
                     if sample_count >= sample_size:
                         break
-                    if len(stack) == 1:
+                    if len(stack)==1:
                         break
                     stack.pop()
                     stack.pop()
                 else:
-                    if len(stack) == 1:
+                    if len(stack)==1:
                         break
                     stack.pop()
                     stack.pop()
@@ -191,17 +195,17 @@ class BatchGenerator():
 
         read_feature = open(os.path.join(DEMOPATH,"Graph_Node_Feature_Handled.txt"), 'r', encoding='utf-8')
         read_origin_node_id = open(os.path.join(DEMOPATH,"Graph_Origin_Node_ID.txt"), 'r', encoding='utf-8')
-        read_graph = open(os.path.join(DEMOPATH,"Graph_Uri.txt"), 'r', encoding='utf-8')
+        read_graph = open(os.path.join(DEMOPATH,"Graph_Uri.txt"), 'r', encoding='utf-8') #类似benchmark.txt的形式
         self.id_2_feature = {}
         self.origin_graph = {}
         self.node_id = {}
         for line in read_feature:
-            res = line.split("\t\t")[1]
-            res = res.split(' ')[0:-1]
+            res = line.split("\t\t")[1] #【0】应该是id【1】应该是fasttext向量
+            res = res.split(' ')
             self.id_2_feature[line.split("\t\t")[0]] = np.array(res).astype(np.float32).tolist()
         read_feature.close()
         temp_str = ""
-        for line in read_origin_node_id:
+        for line in read_origin_node_id: # 应该是URI和ID的组合？
             line = line.replace('\n', '')
             try:
                 if len(line.split("\t\t")) == 2 and len(temp_str)==0:
@@ -256,9 +260,9 @@ class FineTuningBatchGenerator():
         pass
 
     def initialize_original_data(self):
-        read_feature = open("../DBpedia_Data/Graph_Node_Feature_Handled.txt", 'r', encoding='utf-8')
-        read_origin_node_id = open("../DBpedia_Data/Graph_Origin_Node_ID.txt", 'r', encoding='utf-8')
-        read_graph = open("../DBpedia_Data/Original_Graph_Uri.txt", 'r', encoding='utf-8')
+        read_feature = open("../dataset/FGraph_Node_Feature_Handled.txt", 'r', encoding='utf-8')
+        read_origin_node_id = open("../dataset/FGraph_Origin_Node_ID.txt", 'r', encoding='utf-8')
+        read_graph = open("../dataset/FGraph_Uri_labeled.txt", 'r', encoding='utf-8')
 
 
 
@@ -270,7 +274,7 @@ class FineTuningBatchGenerator():
         self.all_labels = []
         for line in read_feature:
             res = line.split("\t\t")[1]
-            res = res.split(' ')[0:-1]
+            res = res.split(' ')
             self.id_2_feature[line.split("\t\t")[0]] = np.array(res).astype(np.float32).tolist()
         read_feature.close()
         temp_str = ""
