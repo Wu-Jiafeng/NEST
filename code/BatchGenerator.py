@@ -2,7 +2,7 @@ import numpy as np
 import random
 import copy
 import os
-DEMOPATH = "../dataset/"
+DEMOPATH = "../dataset/Demo4FED"
 class BatchConfig():
     def __init__(self,batchsize,timestep,randompathcount):
         self.batchsize = batchsize
@@ -262,7 +262,7 @@ class FineTuningBatchGenerator():
     def initialize_original_data(self):
         read_feature = open("../dataset/FGraph_Node_Feature_Handled.txt", 'r', encoding='utf-8')
         read_origin_node_id = open("../dataset/FGraph_Origin_Node_ID.txt", 'r', encoding='utf-8')
-        read_graph = open("../dataset/FGraph_Uri_labeled.txt", 'r', encoding='utf-8')
+        read_graph = open("../dataset/FGraph_URI_labeled.txt", 'r', encoding='utf-8')
 
 
 

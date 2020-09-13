@@ -262,11 +262,11 @@ def useModel(BG,config):
 if __name__ == "__main__":
 
     # 定义一个配置类的对象
-    batchconfig = BatchConfig(batchsize=1,timestep=7,randompathcount=1)
+    batchconfig = BatchConfig(batchsize=512,timestep=7,randompathcount=1)
     BG = BatchGenerator(batchconfig)
 
     config = Config(learning_rate=0.2, batchsize=batchconfig.batchsize, input=300, timestep=8, projection_dim=300,
-                    epoch=10, hidden_unit=4096,n_negative_samples_batch=8192,token_size=BG.token_size,is_Training = True)
+                    epoch=60, hidden_unit=4096,n_negative_samples_batch=128,token_size=BG.token_size,is_Training = True)
 
     trainModel(BG,config)
     # ret = useModel(BG,config)

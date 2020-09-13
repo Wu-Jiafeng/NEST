@@ -70,11 +70,14 @@ def CalSTSScore(id2feature,config):
         with tf.device('/gpu:0'):
             with tf.variable_scope('lm'):
                 lstm_model = Fine_Tuning_BiLstm_Model_Test(config,input=[X_fw,X_bw],label=[Y_fw,Y_bw])
-    saver = tf.train.Saver()
+        init = tf.initialize_all_variables()
+    saver = tf.train.Saver(var_list=tf.trainable_variables())
+
     tfConfig = tf.ConfigProto(allow_soft_placement=True)
     tfConfig.gpu_options.allow_growth = True
     with tf.Session(config=tfConfig) as sess:
-        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt1")
+        sess.run(init)
+        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt/fed/0")
         saver.restore(sess, checkpoint.model_checkpoint_path)
 
         for i in range(len(id2feature)):
@@ -105,12 +108,14 @@ def GenerateSummary(config):
         with tf.device('/gpu:0'):
             with tf.variable_scope('lm'):
                 lstm_model = Fine_Tuning_BiLstm_Model_Test(config,input=[X_fw,X_bw],label=[Y_fw,Y_bw])
+        init = tf.initialize_all_variables()
+    saver = tf.train.Saver(var_list=tf.trainable_variables())
 
-    saver = tf.train.Saver()
     tfConfig = tf.ConfigProto(allow_soft_placement=True)
     tfConfig.gpu_options.allow_growth = True
     with tf.Session(config=tfConfig) as sess:
-        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt1")
+        sess.run(init)
+        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt/fed/0")
         saver.restore(sess, checkpoint.model_checkpoint_path)
 
         for i in range(len(id2id)):

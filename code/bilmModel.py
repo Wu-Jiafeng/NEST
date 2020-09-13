@@ -574,6 +574,8 @@ class Fine_Tuning_BiLstm_Model_Test(object):
             lstm_output.append(tf.nn.dropout(lstm_output_flat_fw,0.9))
             lstm_output.append(tf.nn.dropout(lstm_output_flat_bw, 0.9))
         else:
+            #lstm_output.append(tf.nn.dropout(lstm_output_flat_fw, 0.9))
+            #lstm_output.append(tf.nn.dropout(lstm_output_flat_bw, 0.9))
             lstm_output.append(lstm_output_flat_fw)
             lstm_output.append(lstm_output_flat_bw)
 
@@ -585,8 +587,8 @@ class Fine_Tuning_BiLstm_Model_Test(object):
             dense_input = tf.concat([lstm_output[0], lstm_output[-1]], axis=1)
             dense_input = tf.layers.batch_normalization(dense_input, training=self.is_Training)
             ranking_out = tf.layers.dense(inputs=dense_input,activation='relu',units=4096)
-            if self.is_Training:
-                ranking_out = tf.nn.dropout(ranking_out,0.9)
+            if self.is_Training: ranking_out = tf.nn.dropout(ranking_out,0.9)
+            else: ranking_out = tf.nn.dropout(ranking_out,0.9)
             ranking_out = tf.layers.dense(inputs=ranking_out,activation='relu',units=4096)
             dense_out.append(ranking_out)
             self.loss_input = tf.layers.dense(dense_out[0], activation=None, units=1)
@@ -599,8 +601,8 @@ class Fine_Tuning_BiLstm_Model_Test(object):
                 i += 3
             dense_input = tf.layers.batch_normalization(dense_input, training=self.is_Training)
             diversity_out = tf.layers.dense(inputs=dense_input,activation='relu',units=4096)
-            if self.is_Training:
-                diversity_out = tf.nn.dropout(diversity_out,0.9)
+            if self.is_Training: diversity_out = tf.nn.dropout(diversity_out,0.9)
+            else: diversity_out = tf.nn.dropout(diversity_out,0.9)
             diversity_out = tf.layers.dense(inputs=diversity_out,activation='relu',units=4096)
             dense_out.append(diversity_out)
             self.loss_input_diversity = tf.layers.dense(dense_out[-1], activation=None, units=1)
