@@ -2,7 +2,7 @@ import numpy as np
 import random
 import copy
 import os
-DEMOPATH = "../dataset/Demo4FED"
+DEMOPATH = "../dataset/Demo4FED/"
 class BatchConfig():
     def __init__(self,batchsize,timestep,randompathcount):
         self.batchsize = batchsize

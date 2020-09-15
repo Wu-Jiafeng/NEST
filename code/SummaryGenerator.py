@@ -5,8 +5,7 @@ from BatchGenerator import FineTuningBatchGenerator
 from preTrain import Config
 import time
 import random
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+import tensorflow as tf
 
 def GetTestInput():
     texts, nodes = {}, {}
@@ -23,7 +22,7 @@ def GetTestInput():
         nodes[node] = id
     node2id.close()
 
-    GraphURI = open("../dataset/Graph_URI_ID_ESBML.txt", "r", encoding="utf-8")
+    GraphURI = open("../dataset/Graph_URI_ID_ESBMD.txt", "r", encoding="utf-8")
     lines=GraphURI.readlines()
     ucount,uid=0,None
     for line in lines:
@@ -39,9 +38,9 @@ def GetTestInput():
         if len(line.strip().split("\t\t")) < 4: continue
         id,subj,pred,obj=line.strip().split("\t\t")
         if uid is None or uid != id: uid=id
-        id2graph[int(uid)-101].append([subj, pred, obj])
-        id2id[int(uid)-101].append([nodes[subj], nodes[pred], nodes[obj]])
-        id2feature[int(uid)-101].append([texts[nodes[subj]], texts[nodes[pred]], texts[nodes[obj]]])
+        id2graph[int(uid)-1].append([subj, pred, obj])
+        id2id[int(uid)-1].append([nodes[subj], nodes[pred], nodes[obj]])
+        id2feature[int(uid)-1].append([texts[nodes[subj]], texts[nodes[pred]], texts[nodes[obj]]])
         # 如果ESBMD就uid-1，ESBML就uid-101
     return id2graph,id2id,id2feature
 
@@ -77,7 +76,7 @@ def CalSTSScore(id2feature,config):
     tfConfig.gpu_options.allow_growth = True
     with tf.Session(config=tfConfig) as sess:
         sess.run(init)
-        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt/fed/0")
+        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt/fed/200")
         saver.restore(sess, checkpoint.model_checkpoint_path)
 
         for i in range(len(id2feature)):
@@ -91,7 +90,7 @@ def CalSTSScore(id2feature,config):
         return scores
 
 def GenerateSummary(config):
-    output=open("../dataset/ESBMLTop10_","w",encoding="utf-8")
+    output=open("../dataset/ESBMDTop5_","w",encoding="utf-8")
     id2graph, id2id, id2feature = GetTestInput()
     # cal STS score
     scores_sts=CalSTSScore(id2feature,config)
@@ -115,7 +114,7 @@ def GenerateSummary(config):
     tfConfig.gpu_options.allow_growth = True
     with tf.Session(config=tfConfig) as sess:
         sess.run(init)
-        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt/fed/0")
+        checkpoint = tf.train.get_checkpoint_state("../dataset/ckpt/fed/200")
         saver.restore(sess, checkpoint.model_checkpoint_path)
 
         for i in range(len(id2id)):
@@ -152,5 +151,5 @@ if __name__=="__main__":
     #GetTestInput()
     FTBG = FineTuningBatchGenerator()
     config = Config(learning_rate=0.2, batchsize=1, input=300, timestep=3, projection_dim=300,epoch=1, hidden_unit=4096,
-                    n_negative_samples_batch=8192, token_size=0, is_Training=False,topkSize=10)
+                    n_negative_samples_batch=8192, token_size=0, is_Training=False,topkSize=5)
     GenerateSummary(config)

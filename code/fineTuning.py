@@ -1,11 +1,10 @@
 from bilmModel import Fine_Tuning_BiLstm_Model_Test
 import numpy as np
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 import os
 from BatchGenerator import FineTuningBatchGenerator
 from preTrain import Config
 import time
-tf.disable_v2_behavior()
 
 
 
@@ -120,11 +119,11 @@ def fine_tuning_model_diversity(config,FTBG,saveID):
 
 if __name__ == "__main__":
     FTBG = FineTuningBatchGenerator()
-    config = Config(learning_rate=0.2, batchsize=5, input=300, timestep=3, projection_dim=300,
-                    epoch=20, hidden_unit=4096,n_negative_samples_batch=8192,token_size=0,is_Training = True)
+    config = Config(learning_rate=0.0001, batchsize=5, input=300, timestep=3, projection_dim=300,
+                    epoch=10, hidden_unit=4096,n_negative_samples_batch=8192,token_size=0,is_Training = True)
     config.is_Diversity = False
-    fine_tuning_model_ranking(config,FTBG,1)
+    fine_tuning_model_ranking(config,FTBG,200)
     tf.reset_default_graph()
     config.is_Diversity = True
-    fine_tuning_model_diversity(config,FTBG,1)
+    fine_tuning_model_diversity(config,FTBG,200)
     tf.reset_default_graph()

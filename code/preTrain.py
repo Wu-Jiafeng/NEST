@@ -1,4 +1,4 @@
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 from bilmModel import BiLstm_Model
 from BatchGenerator import BatchGenerator
 import time
@@ -165,7 +165,6 @@ def _deduplicate_indexed_slices(values, indices):
 
 
 def trainModel(BG,config):
-    tf.disable_eager_execution()
     X_fw = tf.placeholder(dtype=tf.float32, shape=[None, config.TimeStep, config.input])
     Y_fw = tf.placeholder(dtype=tf.float32, shape=[None, config.TimeStep])
     X_bw = tf.placeholder(dtype=tf.float32, shape=[None, config.TimeStep, config.input])
@@ -180,7 +179,7 @@ def trainModel(BG,config):
         opt = tf.train.AdagradOptimizer(learning_rate=lr,
                                         initial_accumulator_value=1.0)
         # opt = tf.train.experimental.enable_mixed_precision_graph_rewrite(opt)
-        with tf.device('/gpu:0'):
+        with tf.device('/gpu:1'):
             with tf.variable_scope('lm'):
                 lstm_model = BiLstm_Model(config, input=[X_fw, X_bw], label=[Y_fw, Y_bw])
                 loss = lstm_model.total_loss
@@ -238,7 +237,7 @@ def useModel(BG,config):
 
     with tf.device('/cpu:0'):
         lr = config.learning_rate
-        with tf.device('/gpu:0'):
+        with tf.device('/gpu:1'):
             with tf.variable_scope('lm'):
                 lstm_model = BiLstm_Model(config, input=[X_fw, X_bw], label=[Y_fw, Y_bw])
         init = tf.initialize_all_variables()
@@ -262,11 +261,11 @@ def useModel(BG,config):
 if __name__ == "__main__":
 
     # 定义一个配置类的对象
-    batchconfig = BatchConfig(batchsize=512,timestep=7,randompathcount=1)
+    batchconfig = BatchConfig(batchsize=256,timestep=7,randompathcount=1)
     BG = BatchGenerator(batchconfig)
 
     config = Config(learning_rate=0.2, batchsize=batchconfig.batchsize, input=300, timestep=8, projection_dim=300,
-                    epoch=60, hidden_unit=4096,n_negative_samples_batch=128,token_size=BG.token_size,is_Training = True)
+                    epoch=10, hidden_unit=4096,n_negative_samples_batch=32,token_size=BG.token_size,is_Training = True)
 
     trainModel(BG,config)
     # ret = useModel(BG,config)
